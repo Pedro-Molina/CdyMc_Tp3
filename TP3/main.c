@@ -4,18 +4,23 @@
  * Created: 8/6/2021 16:33:39
  * Author : molin
  */ 
-
+#define  F_CPU 8000000UL
 #include <avr/io.h>
 #include "avr/interrupt.h"
 #include <stdint.h>
 #include "serialPort.h"
 #include <util/delay.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 static volatile unsigned char  bienvenida[200] =" Generador de señales digitales programable \0 Ingrese frecuencia entre 100 y 10000Hz \0 ON: para encender, OFF para apagar, RST para reiniciar \0";
 static volatile uint8_t accion_flag = 0;
-static volatile unsigned char buffer[4];
-void realizar_accion(unsigned char * accion);
+static  char buffer[20];
+void realizar_accion();
 uint8_t comparar_str(unsigned char * str1, unsigned char * str2, uint8_t longitud);
 uint8_t str_to_int(unsigned char * str);
+void Timer1_Init(void);
 int main (void)
 {
 
@@ -23,14 +28,16 @@ int main (void)
 	UCSR0B = (1<<RXEN0) | (1<<TXEN0);//activo recepcion y transmision
 	UCSR0C = (1<<UCSZ01)|(1<<UCSZ00);//tamanio info
 	UBRR0L = 103;
-	SerialPort_TX_Interrupt_Enable();
+	Timer1_Init();
+	//SerialPort_TX_Interrupt_Enable();
+	SerialPort_RX_Interrupt_Enable();
 	sei();
 	while(1)
 	{
 			if (accion_flag == 1)
 			{
 				accion_flag = 0;
-				realizar_accion(buffer);
+				realizar_accion();
 			}
 	}
 	return 0;
@@ -82,74 +89,68 @@ ISR (USART_UDRE_vect)
 		}
 	}
 }
-//usar srt comapare
-//usar atoi
-void realizar_accion(unsigned char * accion)
+
+void realizar_accion()
 {
 		SerialPort_RX_Interrupt_Disable();
-		unsigned char reset[3] = "rst";
-		unsigned char on[3] = "on";
-		unsigned char off[3] = "off";
-		uint8_t nro =0;
+		char reset[4] = "rst";
+		char on[3] = "on";
+		char off[4] = "off";
+		int nro = atoi(buffer);
 		
-		if (comparar_str(reset,accion,(uint8_t)3))
+		if ((100 <= nro ) && (nro <= 10000))
 		{
-			SerialPort_Send_String("resteado \n");
-		}else if (comparar_str(on,accion,(uint8_t)2))
+			OCR1A = 8000000UL/nro - 1;
+		}else if (!strcmp(buffer,reset))
 			{
-				SerialPort_Send_String("prendido \n");
-			}
-			else if (comparar_str(off,accion,(uint8_t)3))
-			{
-				SerialPort_Send_String("apagado \n");
-			}else if (str_to_int(accion))
-			{
-				SerialPort_Send_String("es numero \n");
-				nro = (str_to_int(accion));
-				SerialPort_Send_uint8_t(nro);
-			}else 
-			{
-				SerialPort_Send_String("pija \r");
-				nro = (str_to_int(accion));
-				SerialPort_Send_uint8_t(nro);
-			}
+				DDRB = (0<<PB1); 
+				SerialPort_Send_String("reset");
+			}else if (!strcmp(buffer,on))
+				{
+					DDRB = (1<<PB1); 
+					SerialPort_Send_String("prendido \n");
+				}else if (!strcmp(buffer,off))
+					{
+						DDRB = (0<<PB1);  
+						SerialPort_Send_String("apagado \n");
+					}else 
+						{
+						SerialPort_Send_String("pija \r");
+						}
 		SerialPort_RX_Interrupt_Enable();
 }
-uint8_t comparar_str(unsigned char * str1, unsigned char * str2, uint8_t longitud)
-{
-	uint8_t condicion = 1;
-	for (uint8_t i=0; i< longitud; i++)
-	{
-		if (str1[i]!=str2[i])
-		{
-			condicion = 0;
-			break;
-		}
-	}
-	return condicion;
+
+void Timer1_Init(void){
+	DDRB = (1<<PB1);                        //PB1 Salida
+	TCCR1A=  (1<< COM1A0);                    //COM1A  = Toggle
+	TCCR1B=(1<<WGM12) | (1<<CS10);            //CTC no prescalar
+	//TIMSK1=(1<<OCIE1A);                        //Habilita la interrupcion por captura
 }
-uint8_t str_to_int(unsigned char * str)
-{
-	
-	uint8_t valor = 0,i=0;
-	while (str[i] != '\0')
-	{
-		if ((str[i] <= 57) && (str[i] >= 48) )
-		{
-			valor*=10;
-			valor += (str[i] - 48);
-			
-		}else
-		{
-			valor = 0;
-			return valor;
-		}	
-		i++;
-	}
-	if ((valor >= 100) && (valor <= 10000))
-	{
-		return valor;
-	}else
-		valor= 0;
-		return valor;
+
+/*void Timer1_Init(void){
+	DDRB = (1<<PB1);                        //PB1 Salida
+	TCCR1A=  (1<< COM1A0);                    //COM1A  = Toggle
+	TCCR1B=(1<<WGM12) | (1<<CS10);            //CTC no prescalar
+	OCR1A = 8000000UL/note[pos++] - 1;            //pongo la frecuencia
+	TIMSK1=(1<<OCIE1A);                        //Habilita la interrupcion por captura
 }
+
+
+int main(void)
+{
+	Timer1_Init();
+	sei();
+	while (1);
+}
+
+ISR (TIMER1_COMPA_vect)
+{
+	static unsigned short cant=0;
+	if (++cant == 10){
+		cant = 0;
+		OCR1A = 8000000UL/note[pos++];            //pongo la nueva frecuencia
+		if (pos == 12)
+		pos = 0;
+	}
+}*/
+
