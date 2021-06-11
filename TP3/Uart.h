@@ -6,4 +6,4 @@ void UART_Set_Frecuencia(int f);
 void UART_On();
 void UART_Off();
 void UART_Reset();
-void UART_Print_String(char str[]);
+void UART_Print_Error();
