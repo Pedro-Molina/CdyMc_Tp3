@@ -40,7 +40,7 @@ char* UART_GetComando()
 }
 void UART_Set_Frecuencia(int f)
 {
-	OCR1A = 8000000UL/f - 1;
+	OCR1A = 1000000UL/f - 1;
 	SerialPort_RX_Interrupt_Enable();
 }
 void UART_On()

@@ -240,8 +240,8 @@ void Timer1_Init(void){
 	TCCR1A=  (1<< COM1A0);                    //COM1A  = Toggle
  142:	80 e4       	ldi	r24, 0x40	; 64
  144:	80 93 80 00 	sts	0x0080, r24	; 0x800080 <__DATA_REGION_ORIGIN__+0x20>
-	TCCR1B=(1<<WGM12) | (1<<CS10);            //CTC no prescalar
- 148:	89 e0       	ldi	r24, 0x09	; 9
+	TCCR1B=(1<<WGM12) | (1<<CS11);            //CTC no prescalar
+ 148:	8a e0       	ldi	r24, 0x0A	; 10
  14a:	80 93 81 00 	sts	0x0081, r24	; 0x800081 <__DATA_REGION_ORIGIN__+0x21>
  14e:	08 95       	ret
 
@@ -357,14 +357,14 @@ char* UART_GetComando()
 000001ca <UART_Set_Frecuencia>:
 void UART_Set_Frecuencia(int f)
 {
-	OCR1A = 8000000UL/f - 1;
+	OCR1A = 1000000UL/f - 1;
  1ca:	9c 01       	movw	r18, r24
  1cc:	99 0f       	add	r25, r25
  1ce:	44 0b       	sbc	r20, r20
  1d0:	55 0b       	sbc	r21, r21
- 1d2:	60 e0       	ldi	r22, 0x00	; 0
- 1d4:	72 e1       	ldi	r23, 0x12	; 18
- 1d6:	8a e7       	ldi	r24, 0x7A	; 122
+ 1d2:	60 e4       	ldi	r22, 0x40	; 64
+ 1d4:	72 e4       	ldi	r23, 0x42	; 66
+ 1d6:	8f e0       	ldi	r24, 0x0F	; 15
  1d8:	90 e0       	ldi	r25, 0x00	; 0
  1da:	0e 94 b9 01 	call	0x372	; 0x372 <__udivmodsi4>
  1de:	21 50       	subi	r18, 0x01	; 1

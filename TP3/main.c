@@ -89,6 +89,6 @@ int comparador(char comando[])
 void Timer1_Init(void){
 	//DDRB = (1<<PB1);                        //PB1 Salida
 	TCCR1A=  (1<< COM1A0);                    //COM1A  = Toggle
-	TCCR1B=(1<<WGM12) | (1<<CS10);            //CTC no prescalar
+	TCCR1B=(1<<WGM12) | (1<<CS11);            //CTC no prescalar
 	//TIMSK1=(1<<OCIE1A);                        //Habilita la interrupcion por captura
 }
