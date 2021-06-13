@@ -15,12 +15,9 @@
 #include <stdlib.h>
 #include "avr/interrupt.h"
 #include "Uart.h"
-
+#include "Timer.h"
 void logicaDeAplicacion(char comando[]);
 int comparador(char palabra[]);
-
-void Timer1_Init(void);
-
 
 char comando[10];
 
@@ -85,10 +82,4 @@ int comparador(char comando[])
 		return 2;
 	}
 	return 3;
-}
-void Timer1_Init(void){
-	//DDRB = (1<<PB1);                        //PB1 Salida
-	TCCR1A=  (1<< COM1A0);                    //COM1A  = Toggle
-	TCCR1B=(1<<WGM12) | (1<<CS11);            //CTC no prescalar
-	//TIMSK1=(1<<OCIE1A);                        //Habilita la interrupcion por captura
 }

@@ -9,7 +9,7 @@ static volatile uint8_t comando_flag = 0;
 static volatile uint8_t bienvenida_condicion = 1;
 static char bienvenida[] =" Generador de señales digitales programable \r Ingrese frecuencia entre 100 y 10000Hz \r ON: para encender, OFF para apagar, RST para reiniciar \r";
 static char invalido[]= "Comando invalido \r"; 
-char  * mensaje;
+static char  * mensaje;
 
 static  char buffer[20];
 
@@ -18,7 +18,7 @@ static  char buffer[20];
 void UART_Init()
 {
 	UCSR0B = (1<<RXEN0) | (1<<TXEN0);//activo recepcion y transmision
-	UCSR0C = (1<<UCSZ01)|(1<<UCSZ00);//tamanio info
+	UCSR0C = (1<<UCSZ01)|(1<<UCSZ00);//longitud carcater en la trama de 8 bits
 	UBRR0L = 103;
 	mensaje = bienvenida;
 	UART_Off();
